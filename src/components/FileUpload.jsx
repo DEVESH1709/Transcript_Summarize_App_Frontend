@@ -26,7 +26,7 @@ function FileUpload({ onFileLoaded }) {
 
   return (
     <div className="mb-2">
-      <label className="block font-semibold mb-1">Upload Transcript (TXT):</label>
+      <label className="block font-semibold mb-1">Upload Transcript (.txt) :</label>
       <div className="flex items-center gap-2">
         <input
           ref={inputRef}

@@ -1,5 +1,4 @@
 import React from 'react';
-
 function SummaryEditor({ summary, setSummary }) {
   return (
     <div>

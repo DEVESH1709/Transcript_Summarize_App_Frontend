@@ -14,9 +14,10 @@ function App() {
   const generateSummary = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/summarize`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ transcript, prompt })
       });
       const data = await response.json();

@@ -70,7 +70,7 @@
 
 // export default App;
 import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import FileUpload from "./components/FileUpload";
 import PromptInput from "./components/PromptInput";
 import SummaryEditor from "./components/SummaryEditor";
@@ -85,6 +85,7 @@ function Summarizer() {
   const [prompt, setPrompt] = useState("");
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const generateSummary = async () => {
     setLoading(true);
@@ -110,7 +111,7 @@ function Summarizer() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
@@ -144,7 +145,7 @@ function Summarizer() {
               Generating...
             </>
           ) : (
-            "✨ Generate Summary"
+            "\u2728 Generate Summary"
           )}
         </button>
 

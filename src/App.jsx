@@ -171,18 +171,62 @@ function Summarizer() {
           ) : summaries.length === 0 ? (
             <p className="text-gray-500">No summaries yet.</p>
           ) : (
-            <ul className="space-y-2">
-              {(Array.isArray(summaries) ? summaries : []).map((s) => (
-                <li key={s._id} className="border-b pb-2">
-                  <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
-                  <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
-                  <button
-                    onClick={e => {e.preventDefault(); alert(s.summary);}}
-                    className="mt-1 text-blue-500 hover:underline text-xs"
-                  >View</button>
-                </li>
-              ))}
-            </ul>
+            <>
+              {/* Pinned summaries */}
+              <ul className="space-y-2">
+                {summaries.filter(s => s.pinned).map((s) => (
+                  <li key={s._id} className="border-b pb-2 bg-yellow-100">
+                    <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
+                    <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
+                    <button
+                      onClick={e => {e.preventDefault(); alert(s.summary);}}
+                      className="mt-1 text-blue-500 hover:underline text-xs"
+                    >View</button>
+                    <button
+                      onClick={async e => {
+                        e.preventDefault();
+                        const token = localStorage.getItem("token");
+                        await fetch(`${import.meta.env.VITE_API_URL}/api/summarize/pin/${s._id}`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ pin: false })
+                        });
+                        setSidebarLoading(true);
+                        await fetchSummaries();
+                      }}
+                      className="ml-2 text-yellow-700 hover:underline text-xs"
+                    >Unpin</button>
+                  </li>
+                ))}
+              </ul>
+              {/* Unpinned summaries */}
+              <ul className="space-y-2">
+                {summaries.filter(s => !s.pinned).map((s) => (
+                  <li key={s._id} className="border-b pb-2">
+                    <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
+                    <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
+                    <button
+                      onClick={e => {e.preventDefault(); alert(s.summary);}}
+                      className="mt-1 text-blue-500 hover:underline text-xs"
+                    >View</button>
+                    <button
+                      onClick={async e => {
+                        e.preventDefault();
+                        const token = localStorage.getItem("token");
+                        await fetch(`${import.meta.env.VITE_API_URL}/api/summarize/pin/${s._id}`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ pin: true })
+                        });
+                        setSidebarLoading(true);
+                        await fetchSummaries();
+                      }}
+                      className="ml-2 text-yellow-700 hover:underline text-xs"
+                    >Pin</button>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           <button
             onClick={e => {e.preventDefault(); setShowDashboard(true);}}

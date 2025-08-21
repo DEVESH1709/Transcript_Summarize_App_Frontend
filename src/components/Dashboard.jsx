@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Analytics from "./Analytics";
 
 export default function Dashboard({ onClose, onNewChat }) {
   const [summaries, setSummaries] = useState([]);
@@ -37,7 +38,8 @@ export default function Dashboard({ onClose, onNewChat }) {
           Close
         </button>
       </div>
-      <h2 className="text-3xl font-bold mb-6 text-center">📜 Your Summaries</h2>
+  <h2 className="text-3xl font-bold mb-6 text-center">📜 Your Summaries</h2>
+  <Analytics />
       {loading ? (
         <p>Loading...</p>
       ) : summaries.length === 0 ? (

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function EmailForm({ summary }) {
+function EmailForm({ summary, summaryId }) {
   const [recipients, setRecipients] = useState('');
   const [status, setStatus] = useState('');
 
@@ -10,7 +10,7 @@ function EmailForm({ summary }) {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ summary, recipients })
+        body: JSON.stringify({ summary, recipients, summaryId })
       });
       const data = await response.json();
       if (data.error) throw new Error(data.error);

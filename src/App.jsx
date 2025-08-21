@@ -99,10 +99,18 @@ function Summarizer() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/summarize`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (response.status === 401) {
+        setSummaries([]);
+        setSidebarLoading(false);
+        alert("Session expired or unauthorized. Please login again.");
+        navigate("/login");
+        return;
+      }
       const data = await response.json();
-      setSummaries(data);
+      setSummaries(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching summaries", err);
+      setSummaries([]);
     }
     setSidebarLoading(false);
   };
@@ -164,7 +172,7 @@ function Summarizer() {
             <p className="text-gray-500">No summaries yet.</p>
           ) : (
             <ul className="space-y-2">
-              {summaries.map((s) => (
+              {(Array.isArray(summaries) ? summaries : []).map((s) => (
                 <li key={s._id} className="border-b pb-2">
                   <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
                   <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
@@ -230,7 +238,15 @@ function Summarizer() {
             {summary && (
               <div className="space-y-6">
                 <SummaryEditor summary={summary} setSummary={setSummary} />
-                <EmailForm summary={summary} />
+                <EmailForm 
+                  summary={summary} 
+                  summaryId={
+                    // Find the latest summary for the current user
+                    summaries && summaries.length > 0
+                      ? summaries[0]._id
+                      : null
+                  }
+                />
               </div>
             )}
           </div>

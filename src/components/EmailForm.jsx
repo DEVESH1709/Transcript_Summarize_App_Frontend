@@ -13,11 +13,15 @@ function EmailForm({ summary, summaryId }) {
         body: JSON.stringify({ summary, recipients, summaryId })
       });
       const data = await response.json();
-      if (data.error) throw new Error(data.error);
+      if (!response.ok) {
+        // Show backend error message if available
+        setStatus(data.error ? `Error: ${data.error}` : 'Error sending email');
+        return;
+      }
       setStatus('Email sent!');
     } catch (err) {
       console.error(err);
-      setStatus('Error sending email');
+      setStatus(err.message ? `Error: ${err.message}` : 'Error sending email');
     }
   };
 

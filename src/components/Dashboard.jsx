@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Analytics from "./Analytics";
+import { Eye } from "lucide-react";
 
-export default function Dashboard({ onClose, onNewChat }) {
+export default function Dashboard({ onClose, onNewChat, setTranscript, setPrompt, setSummary, setShowDashboard, setSidebarOpen }) {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +39,8 @@ export default function Dashboard({ onClose, onNewChat }) {
           Close
         </button>
       </div>
-  <h2 className="text-3xl font-bold mb-6 text-center">📜 Your Summaries</h2>
-  <Analytics />
+      <h2 className="text-3xl font-bold mb-6 text-center">📜 Your Summaries</h2>
+      <Analytics />
       {loading ? (
         <p>Loading...</p>
       ) : summaries.length === 0 ? (
@@ -62,10 +63,18 @@ export default function Dashboard({ onClose, onNewChat }) {
                 <td className="border p-2">{s.prompt.slice(0, 40)}...</td>
                 <td className="border p-2">
                   <button
-                    onClick={() => alert(s.summary)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    onClick={e => {
+                      e.preventDefault();
+                      setTranscript(s.transcript || "");
+                      setPrompt(s.prompt || "");
+                      setSummary(s.summary || "");
+                      setShowDashboard(false);
+                      if (window.innerWidth < 768) setSidebarOpen(false);
+                    }}
+                    className="bg-blue-500 hover:bg-blue-100 p-1 rounded"
+                    title="View"
                   >
-                    View
+                    <Eye size={20} />
                   </button>
                 </td>
               </tr>

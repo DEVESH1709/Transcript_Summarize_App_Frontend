@@ -1,74 +1,3 @@
-// import { useState } from 'react';
-// import FileUpload from './components/FileUpload';
-// import PromptInput from './components/PromptInput';
-// import SummaryEditor from './components/SummaryEditor';
-// import EmailForm from './components/EmailForm';
-// import { Loader2 } from "lucide-react"; // optional spinner icon
-
-// function App() {
-//   const [transcript, setTranscript] = useState('');
-//   const [prompt, setPrompt] = useState('');
-//   const [summary, setSummary] = useState('');
-//   const [loading, setLoading] = useState(false);
-
-//   const generateSummary = async () => {
-//     setLoading(true);
-//     try {
-//       const token = localStorage.getItem("token");
-//       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/summarize`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-//         body: JSON.stringify({ transcript, prompt })
-//       });
-//       const data = await response.json();
-//       setSummary(data.summary);
-//     } catch (err) {
-//       console.error(err);
-//       alert('Error generating summary');
-//     }
-//     setLoading(false);
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-start py-10 px-4">
-//       <h1 className="text-3xl font-extrabold text-gray-800 mb-8 text-center">
-//         Transcript <span className="text-blue-600">Summarizer</span>
-//       </h1>
-
-//       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6 space-y-6">
-//         <FileUpload onFileLoaded={text => setTranscript(text)} />
-
-//         <PromptInput prompt={prompt} setPrompt={setPrompt} />
-
-//         <button
-//           onClick={generateSummary}
-//           disabled={loading}
-//           className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition 
-//             ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} 
-//             text-white shadow-md`}
-//         >
-//           {loading ? (
-//             <>
-//               <Loader2 className="w-5 h-5 animate-spin" />
-//               Generating...
-//             </>
-//           ) : (
-//             "✨ Generate Summary"
-//           )}
-//         </button>
-
-//         {summary && (
-//           <div className="space-y-6">
-//             <SummaryEditor summary={summary} setSummary={setSummary} />
-//             <EmailForm summary={summary} />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import FileUpload from "./components/FileUpload";
@@ -79,10 +8,11 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
+import ShareButton from "./components/ShareButton";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-
-import { Menu, X } from "lucide-react";
+import Navbar from "./components/Navbar";
+import { Menu, X, Pin, PinOff, Eye } from "lucide-react";
 
 function Summarizer() {
   const [transcript, setTranscript] = useState("");
@@ -151,8 +81,8 @@ function Summarizer() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col md:flex-row">
-      {/* Sidebar open/close icon for mobile */}
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col md:flex-row">
+   
       <button
         className="md:hidden fixed top-4 left-4 z-50 bg-white rounded-full shadow p-2 transition-all duration-300"
         onClick={() => setSidebarOpen(true)}
@@ -163,9 +93,10 @@ function Summarizer() {
       </button>
       {/* Sidebar */}
       <aside
-        className={`fixed md:static top-0 left-0 h-full w-72 md:w-80 bg-white shadow-lg p-4 flex flex-row md:flex-col gap-4 md:gap-0 z-40 transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        className={`fixed md:static top-0 left-0 h-screen w-72 md:w-80 bg-white shadow-lg p-4 flex flex-row md:flex-col gap-4 md:gap-0 z-40 transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
         style={{ minHeight: '100vh' }}
       >
+ 
         {/* Close icon for mobile */}
         <button
           className="md:hidden absolute top-4 right-4 bg-white rounded-full shadow p-2"
@@ -198,13 +129,25 @@ function Summarizer() {
               {/* Pinned summaries */}
               <ul className="space-y-2">
                 {summaries.filter(s => s.pinned).map((s) => (
-                  <li key={s._id} className="border-b pb-2 bg-yellow-100">
-                    <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
-                    <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
-                    <button
-                      onClick={e => {e.preventDefault(); alert(s.summary);}}
-                      className="mt-1 text-blue-500 hover:underline text-xs"
-                    >View</button>
+                  <li key={s._id} className="border-b pb-2 bg-yellow-100 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
+                      <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
+                      <button
+                        onClick={e => {
+                          e.preventDefault();
+                          setTranscript(s.transcript || "");
+                          setPrompt(s.prompt || "");
+                          setSummary(s.summary || "");
+                          setShowDashboard(false);
+                          if (window.innerWidth < 768) setSidebarOpen(false);
+                        }}
+                        className="mt-1 text-blue-500 hover:bg-blue-100 p-1 rounded"
+                        title="View"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    </div>
                     <button
                       onClick={async e => {
                         e.preventDefault();
@@ -217,21 +160,36 @@ function Summarizer() {
                         setSidebarLoading(true);
                         await fetchSummaries();
                       }}
-                      className="ml-2 text-yellow-700 hover:underline text-xs"
-                    >Unpin</button>
+                      className="ml-2 text-yellow-700 hover:bg-yellow-200 p-1 rounded"
+                      title="Unpin"
+                    >
+                      <PinOff size={20} />
+                    </button>
                   </li>
                 ))}
               </ul>
               {/* Unpinned summaries */}
               <ul className="space-y-2">
                 {summaries.filter(s => !s.pinned).map((s) => (
-                  <li key={s._id} className="border-b pb-2">
-                    <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
-                    <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
-                    <button
-                      onClick={e => {e.preventDefault(); alert(s.summary);}}
-                      className="mt-1 text-blue-500 hover:underline text-xs"
-                    >View</button>
+                  <li key={s._id} className="border-b pb-2 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
+                      <div className="font-medium">{s.prompt.slice(0, 30)}...</div>
+                      <button
+                        onClick={e => {
+                          e.preventDefault();
+                          setTranscript(s.transcript || "");
+                          setPrompt(s.prompt || "");
+                          setSummary(s.summary || "");
+                          setShowDashboard(false);
+                          if (window.innerWidth < 768) setSidebarOpen(false);
+                        }}
+                        className="mt-1 text-blue-500 hover:bg-blue-100 p-1 rounded"
+                        title="View"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    </div>
                     <button
                       onClick={async e => {
                         e.preventDefault();
@@ -244,26 +202,32 @@ function Summarizer() {
                         setSidebarLoading(true);
                         await fetchSummaries();
                       }}
-                      className="ml-2 text-yellow-700 hover:underline text-xs"
-                    >Pin</button>
+                      className="ml-2 text-yellow-700 hover:bg-yellow-100 p-1 rounded"
+                      title="Pin"
+                    >
+                      <Pin size={20} />
+                    </button>
                   </li>
                 ))}
               </ul>
             </>
           )}
-          <button
+          
+        </div>
+        <div className="flex flex-col justify-center gap-2 items-center mt-4 p-0">
+        <button
             onClick={e => {e.preventDefault(); setShowDashboard(true); if (window.innerWidth < 768) setSidebarOpen(false);}}
             className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
           >
             Expand
           </button>
-        </div>
         <button
           onClick={e => {e.preventDefault(); handleLogout();}}
-          className="self-end md:self-auto bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          className="self-end w-full md:self-auto bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
         >
           Logout
         </button>
+        </div>
       </aside>
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-start py-6 px-2 sm:px-4">
@@ -276,31 +240,48 @@ function Summarizer() {
               setPrompt("");
               setSummary("");
             }}
+            setTranscript={setTranscript}
+            setPrompt={setPrompt}
+            setSummary={setSummary}
+            setShowDashboard={setShowDashboard}
+            setSidebarOpen={setSidebarOpen}
           />
         ) : (
-          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 text-center mb-4 sm:mb-6">
+         <div className="w-screen max-w-5xl overflow-auto bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="w-full flex justify-center items-center bg-white border-b border-gray-200 shadow-sm px-2 md:px-6 sticky top-0 z-20">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 text-center">
               Transcript <span className="text-blue-600">Summarizer</span>
             </h1>
+          </div>
+          <div className="w-full max-w-5xl overflow-auto bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-6 ">
+          {/* <div className="w-full flex justify-center items-center bg-white border-b border-gray-200 shadow-sm px-2 md:px-6 sticky top-0 z-20">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 text-center">
+              Transcript <span className="text-blue-600">Summarizer</span>
+            </h1>
+          </div> */}
+           
             <FileUpload onFileLoaded={(text) => setTranscript(text)} />
             <PromptInput prompt={prompt} setPrompt={setPrompt} />
 
-            <button
-              onClick={generateSummary}
-              disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl font-semibold transition 
-                ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} 
-                text-white shadow-md`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "\u2728 Generate Summary"
-              )}
-            </button>
+            <div className="flex gap-2 w-full">
+              <button
+                onClick={generateSummary}
+                disabled={loading}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-xl font-semibold transition 
+                  ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"} 
+                  text-white shadow-md`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "\u2728 Generate Summary"
+                )}
+              </button>
+              <ShareButton summary={summary} />
+            </div>
 
             {summary && (
               <div className="space-y-6">
@@ -316,6 +297,7 @@ function Summarizer() {
                 />
               </div>
             )}
+          </div>
           </div>
         )}
       </main>

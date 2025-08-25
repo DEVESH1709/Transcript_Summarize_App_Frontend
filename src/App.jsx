@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import ShareSummary from "./components/ShareSummary";
 import FileUpload from "./components/FileUpload";
 import PromptInput from "./components/PromptInput";
 import SummaryEditor from "./components/SummaryEditor";
@@ -280,7 +281,7 @@ function Summarizer() {
                   "\u2728 Generate Summary"
                 )}
               </button>
-              <ShareButton summary={summary} />
+              <ShareButton summary={summaries && summaries.length > 0 ? summaries[0] : {}} />
             </div>
 
             {summary && (
@@ -311,7 +312,8 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
+        {/* Public share route for recruiter/demo */}
+        <Route path="/share/:shareId" element={<ShareSummary />} />
         {/* Protected route */}
         <Route
           path="/"
@@ -321,7 +323,6 @@ export default function App() {
             </PrivateRoute>
           }
         />
-  {/* /dashboard route removed for cleanup */}
       </Routes>
     </BrowserRouter>
   );
